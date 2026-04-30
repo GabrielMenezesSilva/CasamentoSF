@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Lock, Image as ImageIcon, Download, RefreshCw } from "lucide-react";
+import { Lock, Image as ImageIcon, Download, RefreshCw, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 type Photo = {
@@ -40,6 +40,33 @@ export default function Galeria() {
       fetchPhotos();
     }
   }, [isAuthenticated]);
+
+  const handleDelete = async (photoId: string, photoUrl: string) => {
+    if (!window.confirm("Tem certeza que deseja excluir esta foto da galeria?")) return;
+
+    try {
+      // The URL format is usually: .../storage/v1/object/public/wedding_photos/fileName.jpg
+      const urlParts = photoUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      
+      // Delete from storage
+      await supabase.storage.from('wedding_photos').remove([fileName]);
+
+      // Delete from database
+      const { error } = await supabase
+        .from('photos')
+        .delete()
+        .eq('id', photoId);
+
+      if (error) throw error;
+
+      // Update local state
+      setPhotos(photos.filter(p => p.id !== photoId));
+    } catch (err) {
+      console.error("Erro ao deletar foto:", err);
+      alert("Ocorreu um erro ao excluir a foto.");
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,7 +169,16 @@ export default function Galeria() {
                 alt={`Foto de ${photo.uploader_name}`} 
                 className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
+                <div className="flex justify-end">
+                  <button 
+                    onClick={() => handleDelete(photo.id, photo.url)}
+                    className="p-2 bg-red-500/80 hover:bg-red-500 text-white rounded-full backdrop-blur-sm transition-colors"
+                    title="Excluir foto"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
                 <div className="text-white">
                   <p className="text-sm font-medium">Enviado por: {photo.uploader_name}</p>
                   <p className="text-xs text-gray-300">
