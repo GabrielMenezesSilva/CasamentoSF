@@ -41,13 +41,30 @@ export default function Galeria() {
     }
   }, [isAuthenticated]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Senha provisória
-    if (password === "casamento123") {
-      setIsAuthenticated(true);
-      setError(false);
-    } else {
+    
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'gallery_password')
+        .single();
+        
+      if (fetchError) {
+        console.error("Erro ao verificar senha:", fetchError);
+        setError(true);
+        return;
+      }
+      
+      if (data && password === data.value) {
+        setIsAuthenticated(true);
+        setError(false);
+      } else {
+        setError(true);
+      }
+    } catch (err) {
+      console.error(err);
       setError(true);
     }
   };
