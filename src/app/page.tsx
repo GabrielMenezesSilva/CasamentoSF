@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Camera, Upload, X, Heart, Loader2 } from "lucide-react";
+import { Camera, Upload, X, Heart, Loader2, Lock } from "lucide-react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 export default function Home() {
@@ -73,7 +74,17 @@ export default function Home() {
 
   return (
     <main className="flex-1 flex flex-col items-center p-6 sm:p-12 max-w-3xl mx-auto w-full">
-      <header className="text-center space-y-4 mb-12 mt-8">
+      <div className="w-full flex justify-end mb-4">
+        <Link 
+          href="/galeria" 
+          className="text-sm text-text-muted hover:text-primary transition-colors flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-primary/5"
+        >
+          <Lock size={14} />
+          <span>Acesso dos Noivos</span>
+        </Link>
+      </div>
+
+      <header className="text-center space-y-4 mb-12 mt-4">
         <h1 className="font-serif text-5xl sm:text-6xl text-primary-dark font-medium tracking-tight">
           Sandrinha <span className="text-primary">&</span> Fred
         </h1>
